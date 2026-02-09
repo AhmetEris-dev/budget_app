@@ -3,7 +3,10 @@ package com.ahmete.budget_app.alert.repository;
 import com.ahmete.budget_app.alert.entity.Alert;
 import com.ahmete.budget_app.alert.entity.AlertType;
 import com.ahmete.budget_app.budget.entity.BudgetPeriodType;
+import com.ahmete.budget_app.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
 
 public interface AlertRepository extends JpaRepository<Alert, Long> {
 	boolean existsByUserIdAndPeriodTypeAndYearAndMonthAndType(
@@ -13,4 +16,5 @@ public interface AlertRepository extends JpaRepository<Alert, Long> {
 			Integer month,
 			AlertType type);
 	
+	List<Alert> findByUserOrderByCreatedAtDesc(User user);
 }

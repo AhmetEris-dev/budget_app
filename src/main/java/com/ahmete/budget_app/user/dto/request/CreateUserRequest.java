@@ -1,4 +1,4 @@
-package com.ahmete.budget_app.user.dto;
+package com.ahmete.budget_app.user.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

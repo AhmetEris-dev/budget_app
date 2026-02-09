@@ -1,31 +1,35 @@
 package com.ahmete.budget_app.budget.controller;
 
-import com.ahmete.budget_app.budget.dto.UpdateBudgetRequest;
-import com.ahmete.budget_app.budget.entity.Budget;
+import com.ahmete.budget_app.constants.RestApis;
+import com.ahmete.budget_app.budget.dto.request.UpsertBudgetRequest;
+import com.ahmete.budget_app.budget.dto.response.BudgetResponse;
+import com.ahmete.budget_app.budget.entity.BudgetPeriodType;
 import com.ahmete.budget_app.budget.service.BudgetService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/budgets")
+@RequestMapping(RestApis.Budget.ROOT)
 public class BudgetController {
 	
 	private final BudgetService budgetService;
+	public BudgetController(BudgetService budgetService) { this.budgetService = budgetService; }
 	
-	public BudgetController(BudgetService budgetService) {
-		this.budgetService = budgetService;
+	@PostMapping
+	@ResponseStatus(HttpStatus.CREATED)
+	public BudgetResponse upsert(@Valid @RequestBody UpsertBudgetRequest request) {
+		return budgetService.upsert(request);
 	}
 	
-	@PutMapping
-	@ResponseStatus(HttpStatus.OK)
-	public Budget upsert(@Valid @RequestBody UpdateBudgetRequest request) {
-		return budgetService.updateBudget(
-				request.userId(),
-				request.periodType(),
-				request.year(),
-				request.month(),
-				request.limitAmount()
-		);
+	@GetMapping(RestApis.Budget.ACTIVE)
+	public BudgetResponse getActive(
+			@RequestParam Long userId,
+			@RequestParam BudgetPeriodType periodType,
+			@RequestParam int year,
+			@RequestParam(required = false) Integer month
+	) {
+		return budgetService.getActive(userId, periodType, year, month);
 	}
+	
 }

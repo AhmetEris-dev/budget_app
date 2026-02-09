@@ -6,6 +6,7 @@ import com.ahmete.budget_app.alert.repository.AlertRepository;
 import com.ahmete.budget_app.budget.entity.Budget;
 import com.ahmete.budget_app.budget.entity.BudgetPeriodType;
 import com.ahmete.budget_app.budget.repository.BudgetRepository;
+import com.ahmete.budget_app.expense.dto.response.ExpenseResponse;
 import com.ahmete.budget_app.expense.entity.Expense;
 import com.ahmete.budget_app.expense.entity.ExpenseType;
 import com.ahmete.budget_app.expense.repository.ExpenseRepository;
@@ -95,4 +96,65 @@ public class ExpenseService {
         BigDecimal sum = expenseRepository.sumAmountByUserIdAndExpenseDateBetween(user.getId(), start, end);
         return sum != null ? sum : BigDecimal.ZERO;
     }
+    @Transactional
+    public ExpenseResponse create(com.ahmete.budget_app.expense.dto.request.CreateExpenseRequest request) {
+        Expense saved = createExpense(
+                request.userId(),
+                request.amount(),
+                request.expenseDate(),
+                request.title(),
+                request.description(),
+                request.type()
+        );
+        
+        return toResponse(saved);
+    }
+    
+    @Transactional(readOnly = true)
+    public java.util.List<com.ahmete.budget_app.expense.dto.response.ExpenseResponse> listByPeriod(
+            Long userId,
+            java.time.LocalDate start,
+            java.time.LocalDate end
+    ) {
+        User user = userRepository.findById(userId)
+                                  .orElseThrow(() -> new java.util.NoSuchElementException("User not found: " + userId));
+        
+        return expenseRepository
+                .findByUserAndExpenseDateBetweenOrderByExpenseDateAsc(user, start, end)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+    
+    @Transactional(readOnly = true)
+    public com.ahmete.budget_app.expense.dto.response.ExpenseSummaryResponse sumByPeriod(
+            Long userId,
+            java.time.LocalDate start,
+            java.time.LocalDate end
+    ) {
+        // native query kullanıyorsun -> userId ile sum al
+        java.math.BigDecimal total = expenseRepository.sumAmountByUserIdAndExpenseDateBetween(userId, start, end);
+        if (total == null) total = java.math.BigDecimal.ZERO;
+        
+        return new com.ahmete.budget_app.expense.dto.response.ExpenseSummaryResponse(
+                userId,
+                start.toString(),
+                end.toString(),
+                total
+        );
+    }
+    
+    private com.ahmete.budget_app.expense.dto.response.ExpenseResponse toResponse(Expense e) {
+        return new com.ahmete.budget_app.expense.dto.response.ExpenseResponse(
+                e.getId(),
+                e.getUser().getId(),
+                e.getAmount(),
+                e.getExpenseDate(),
+                e.getTitle(),
+                e.getDescription(),
+                e.getType(),
+                e.getCreatedAt()
+        );
+    }
+    
 }
