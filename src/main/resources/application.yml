@@ -1,0 +1,23 @@
+server:
+  port: 9090
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/budget_app
+    username: postgres
+    password: root
+
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+budget:
+  alert:
+    thresholds:
+      warning: 0.80
+      exceeded: 1.00
+      critical: 1.20
