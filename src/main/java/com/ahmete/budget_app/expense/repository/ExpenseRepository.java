@@ -12,19 +12,21 @@ import java.util.List;
 
 public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     
-    @Query(value = """
-    SELECT
-    FROM expenses
-    WHERE user_id = :userId
-      AND expense_date BETWEEN :start AND :end
-    """, nativeQuery = true)
+    @Query("""
+        select coalesce(sum(e.amount), 0)
+        from Expense e
+        where e.user.id = :userId
+          and e.expenseDate between :start and :end
+    """)
     BigDecimal sumAmountByUserIdAndExpenseDateBetween(
             @Param("userId") Long userId,
             @Param("start") LocalDate start,
-            @Param("end") LocalDate end);
-
+            @Param("end") LocalDate end
+    );
+    
     List<Expense> findByUserAndExpenseDateBetweenOrderByExpenseDateAsc(
             User user,
             LocalDate start,
-            LocalDate end);
+            LocalDate end
+    );
 }

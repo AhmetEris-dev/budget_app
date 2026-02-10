@@ -1,5 +1,6 @@
 package com.ahmete.budget_app.expense.controller;
 
+import com.ahmete.budget_app.constants.RestApis;
 import com.ahmete.budget_app.expense.dto.request.CreateExpenseRequest;
 import com.ahmete.budget_app.expense.dto.response.ExpenseResponse;
 import com.ahmete.budget_app.expense.dto.response.ExpenseSummaryResponse;
@@ -13,7 +14,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/expenses")
+@RequestMapping(RestApis.Expense.ROOT)
 public class ExpenseController {
 	
 	private final ExpenseService expenseService;
@@ -37,7 +38,8 @@ public class ExpenseController {
 		return expenseService.listByPeriod(userId, start, end);
 	}
 	
-	@GetMapping("/summary")
+	// RestApis.Expense.TOTAL = "/total" tanımlı; onu kullanıyoruz
+	@GetMapping(RestApis.Expense.TOTAL)
 	public ExpenseSummaryResponse summary(
 			@RequestParam Long userId,
 			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,

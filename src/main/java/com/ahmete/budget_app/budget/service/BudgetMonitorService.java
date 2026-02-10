@@ -29,11 +29,13 @@ public class BudgetMonitorService {
 	private final AlertRepository alertRepository;
 	private final BudgetAlertProperties props;
 	
-	public BudgetMonitorService(BudgetRepository budgetRepository,
-	                            UserRepository userRepository,
-	                            ExpenseRepository expenseRepository,
-	                            AlertRepository alertRepository,
-	                            BudgetAlertProperties props) {
+	public BudgetMonitorService(
+			BudgetRepository budgetRepository,
+			UserRepository userRepository,
+			ExpenseRepository expenseRepository,
+			AlertRepository alertRepository,
+			BudgetAlertProperties props
+	) {
 		this.budgetRepository = budgetRepository;
 		this.userRepository = userRepository;
 		this.expenseRepository = expenseRepository;
@@ -50,11 +52,14 @@ public class BudgetMonitorService {
 		int month = expenseDate.getMonthValue();
 		
 		Optional<Budget> budgetOpt =
-				budgetRepository.findByUserAndPeriodTypeAndYearAndMonthAndDeletedFalse(user, BudgetPeriodType.MONTHLY, year, month);
+				budgetRepository.findByUserAndPeriodTypeAndYearAndMonthAndDeletedFalse(
+						user, BudgetPeriodType.MONTHLY, year, month
+				);
 		
 		if (budgetOpt.isEmpty()) {
-			budgetOpt =
-					budgetRepository.findByUserAndPeriodTypeAndYearAndMonthIsNullAndDeletedFalse(user, BudgetPeriodType.YEARLY, year);
+			budgetOpt = budgetRepository.findByUserAndPeriodTypeAndYearAndMonthIsNullAndDeletedFalse(
+					user, BudgetPeriodType.YEARLY, year
+			);
 		}
 		
 		if (budgetOpt.isEmpty()) return;
@@ -66,7 +71,7 @@ public class BudgetMonitorService {
 		String periodStr;
 		
 		if (budget.getPeriodType() == BudgetPeriodType.MONTHLY) {
-			int m = budget.getMonth(); // monthly ise null olmamalı
+			int m = budget.getMonth(); // monthly ise null değil
 			start = LocalDate.of(budget.getYear(), m, 1);
 			end = YearMonth.of(budget.getYear(), m).atEndOfMonth();
 			periodStr = budget.getYear() + "-" + String.format("%02d", m);
@@ -77,7 +82,6 @@ public class BudgetMonitorService {
 		}
 		
 		BigDecimal totalSpent = expenseRepository.sumAmountByUserIdAndExpenseDateBetween(userId, start, end);
-		if (totalSpent == null) totalSpent = BigDecimal.ZERO;
 		
 		BigDecimal limit = budget.getLimitAmount();
 		if (limit == null || limit.compareTo(BigDecimal.ZERO) <= 0) return;
@@ -88,8 +92,8 @@ public class BudgetMonitorService {
 		if (type == null) return;
 		
 		boolean exists = alertRepository.existsByUserIdAndPeriodTypeAndYearAndMonthAndType(
-				userId, budget.getPeriodType(), budget.getYear(), budget.getMonth(), type);
-		
+				userId, budget.getPeriodType(), budget.getYear(), budget.getMonth(), type
+		);
 		if (exists) return;
 		
 		String message = "Budget breach: type=" + type +

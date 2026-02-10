@@ -18,7 +18,6 @@ import java.util.List;
 public class ApiKeyAuthFilter extends OncePerRequestFilter {
 	
 	public static final String HEADER = "X-API-KEY";
-	
 	private final ApiKeyRepository apiKeyRepository;
 	
 	public ApiKeyAuthFilter(ApiKeyRepository apiKeyRepository) {
@@ -27,8 +26,11 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
 	
 	@Override
 	protected boolean shouldNotFilter(HttpServletRequest request) {
+		if ("OPTIONS".equalsIgnoreCase(request.getMethod())) return true;
+		
 		String path = request.getRequestURI();
-		return path.startsWith("/v3/api-docs")
+		return path.startsWith("/api/v1/api-keys")   // ✅ BOOTSTRAP: key üretme
+				|| path.startsWith("/v3/api-docs")
 				|| path.startsWith("/swagger-ui")
 				|| path.startsWith("/actuator/health");
 	}
@@ -55,7 +57,6 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
 			return;
 		}
 		
-		// Basit bir principal; sonra clientName'i principal yapabiliriz.
 		var auth = new UsernamePasswordAuthenticationToken(
 				"api-client",
 				null,

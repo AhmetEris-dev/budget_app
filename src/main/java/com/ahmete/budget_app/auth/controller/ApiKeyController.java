@@ -14,8 +14,6 @@ public class ApiKeyController {
 		this.service = service;
 	}
 	
-	// İlk key’i üretmek için bunu geçici olarak permitAll yapacağız,
-	// veya bootstrap key ile koruruz. Şimdilik hızlı gidelim:
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	public ApiKeyService.GeneratedKey create(@RequestParam String clientName) {

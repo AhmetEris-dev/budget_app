@@ -28,15 +28,12 @@ public class SecurityConfig {
         );
         
         http.authorizeHttpRequests(auth -> auth
-                // 🔓 SADECE BURASI permitAll
                 .requestMatchers(
                         "/api/v1/api-keys/**",
                         "/v3/api-docs/**",
                         "/swagger-ui/**",
                         "/actuator/health"
                 ).permitAll()
-                
-                // 🔒 geri kalan HER ŞEY api key ister
                 .anyRequest().authenticated()
         );
         
