@@ -7,47 +7,56 @@ import com.ahmete.budget_app.user.entity.User;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "alerts")
 @Access(AccessType.FIELD)
 @lombok.Getter
 public class Alert extends BaseEntity {
-
+    
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-
+    
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "budget_id", nullable = false)
     private Budget budget;
-
+    
     @Enumerated(EnumType.STRING)
     @Column(name = "period_type", nullable = false, length = 20)
     private BudgetPeriodType periodType;
-
+    
     @Column(nullable = false)
     private int year;
-
+    
     @Column
     private Integer month;
-
+    
     @Column(name = "limit_amount", nullable = false, precision = 19, scale = 2)
     private BigDecimal limitAmount;
-
+    
     @Column(name = "total_expense", nullable = false, precision = 19, scale = 2)
     private BigDecimal totalExpense;
-
+    
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private AlertType type;
-
+    
     @Column(length = 500)
     private String message;
-
-    protected Alert() {
-    }
-
+    
+    // ✅ NEW
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private AlertStatus status = AlertStatus.ACTIVE;
+    
+    // ✅ NEW
+    @Column(name = "read_at")
+    private LocalDateTime readAt;
+    
+    protected Alert() {}
+    
     public Alert(User user, Budget budget, BudgetPeriodType periodType, int year, Integer month,
                  BigDecimal limitAmount, BigDecimal totalExpense, AlertType type) {
         this.user = user;
@@ -58,8 +67,9 @@ public class Alert extends BaseEntity {
         this.limitAmount = limitAmount;
         this.totalExpense = totalExpense;
         this.type = type;
+        this.status = AlertStatus.ACTIVE;
     }
-
+    
     public Alert(User user, Budget budget, BudgetPeriodType periodType, int year, Integer month,
                  BigDecimal limitAmount, BigDecimal totalExpense, AlertType type, String message) {
         this.user = user;
@@ -71,5 +81,14 @@ public class Alert extends BaseEntity {
         this.totalExpense = totalExpense;
         this.type = type;
         this.message = message;
+        this.status = AlertStatus.ACTIVE;
+    }
+    
+    // ✅ NEW: domain method
+    public void markRead() {
+        if (this.status != AlertStatus.READ) {
+            this.status = AlertStatus.READ;
+            this.readAt = LocalDateTime.now();
+        }
     }
 }
