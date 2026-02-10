@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 
 @RestController
@@ -32,19 +33,28 @@ public class ExpenseController {
 	@GetMapping
 	public List<ExpenseResponse> listByPeriod(
 			@RequestParam Long userId,
-			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
-			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end
 	) {
-		return expenseService.listByPeriod(userId, start, end);
+		LocalDate[] range = resolveDateRange(start, end);
+		return expenseService.listByPeriod(userId, range[0], range[1]);
 	}
 	
-	// RestApis.Expense.TOTAL = "/total" tanımlı; onu kullanıyoruz
 	@GetMapping(RestApis.Expense.TOTAL)
 	public ExpenseSummaryResponse summary(
 			@RequestParam Long userId,
-			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
-			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end
 	) {
-		return expenseService.sumByPeriod(userId, start, end);
+		LocalDate[] range = resolveDateRange(start, end);
+		return expenseService.sumByPeriod(userId, range[0], range[1]);
+	}
+	
+	private LocalDate[] resolveDateRange(LocalDate start, LocalDate end) {
+		if (start != null && end != null) {
+			return new LocalDate[]{start, end};
+		}
+		YearMonth ym = YearMonth.now();
+		return new LocalDate[]{ym.atDay(1), ym.atEndOfMonth()};
 	}
 }

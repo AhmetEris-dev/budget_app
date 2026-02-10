@@ -27,4 +27,9 @@ public final class RestApis {
 		private Alert() {}
 		public static final String ROOT = API + "/alerts";
 	}
+	public static final class Common {
+		private Common() {}
+		public static final String BY_ID = "/{id}";
+	}
+	
 }

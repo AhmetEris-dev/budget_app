@@ -101,5 +101,31 @@ public class BudgetService {
                 budget.getCreatedAt()
         );
     }
+    @Transactional(readOnly = true)
+    public BudgetResponse getById(Long id) {
+        Budget budget = budgetRepository.findByIdAndDeletedFalse(id)
+                                        .orElseThrow(() -> new NoSuchElementException("Budget not found: " + id));
+        return BudgetMapper.toResponse(budget);
+    }
+    
+    @Transactional(readOnly = true)
+    public java.util.List<BudgetResponse> listByUser(Long userId) {
+        User user = userRepository.findById(userId)
+                                  .orElseThrow(() -> new NoSuchElementException("User not found: " + userId));
+        
+        return budgetRepository.findByUserAndDeletedFalseOrderByCreatedAtDesc(user)
+                               .stream()
+                               .map(BudgetMapper::toResponse)
+                               .toList();
+    }
+    
+    @Transactional
+    public void delete(Long id) {
+        Budget budget = budgetRepository.findByIdAndDeletedFalse(id)
+                                        .orElseThrow(() -> new NoSuchElementException("Budget not found: " + id));
+        
+        budget.softDelete();
+        budgetRepository.save(budget);
+    }
     
 }

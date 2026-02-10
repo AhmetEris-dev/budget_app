@@ -6,42 +6,33 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import org.hibernate.annotations.SQLDelete;
 
-
 import java.math.BigDecimal;
 
-/**
- * Uniqueness: UNIQUE(user_id, period_type, year, month, deleted).
- * A partial unique index (e.g. WHERE deleted = false) is preferred in PostgreSQL
- * to enforce a single active budget per (user, periodType, year, month).
- */
 @Entity
-@Table(name = "budgets", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"user_id", "period_type", "year", "month", "deleted"})
-})
+@Table(name = "budgets")
 @SQLDelete(sql = "UPDATE budgets SET deleted = true, deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
 @Getter
 public class Budget extends SoftDeletableEntity {
-
+    
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-
+    
     @Enumerated(EnumType.STRING)
     @Column(name = "period_type", nullable = false, length = 20)
     private BudgetPeriodType periodType;
-
+    
     @Column(nullable = false)
     private int year;
-
+    
     @Column
     private Integer month;
-
+    
     @Column(name = "limit_amount", nullable = false, precision = 19, scale = 2)
     private BigDecimal limitAmount;
-
-    protected Budget() {
-    }
-
+    
+    protected Budget() { }
+    
     public Budget(User user, BudgetPeriodType periodType, int year, Integer month, BigDecimal limitAmount) {
         this.user = user;
         this.periodType = periodType;
@@ -50,7 +41,7 @@ public class Budget extends SoftDeletableEntity {
         this.limitAmount = limitAmount;
         validatePeriod();
     }
-
+    
     @PrePersist
     @PreUpdate
     private void validatePeriod() {
