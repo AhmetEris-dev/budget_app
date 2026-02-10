@@ -49,8 +49,8 @@ public class ExpenseService {
         
         Expense saved = expenseRepository.save(expense);
         
-        // ✅ Alert mantığı TEK yerden yönetilecek
-        budgetMonitorService.evaluateAndAlert(user.getId(), request.expenseDate());
+        // ✅ Tek doğru yer: budget/alert kontrolü
+        budgetMonitorService.evaluateAndAlert(user.getId(), saved.getExpenseDate());
         
         return toResponse(saved);
     }
@@ -70,6 +70,7 @@ public class ExpenseService {
     @Transactional(readOnly = true)
     public ExpenseSummaryResponse sumByPeriod(Long userId, LocalDate start, LocalDate end) {
         BigDecimal total = expenseRepository.sumAmountByUserIdAndExpenseDateBetween(userId, start, end);
+        if (total == null) total = BigDecimal.ZERO;
         
         return new ExpenseSummaryResponse(
                 userId,
