@@ -4,56 +4,45 @@ import com.ahmete.budget_app.alert.dto.response.AlertResponse;
 import com.ahmete.budget_app.alert.entity.Alert;
 import com.ahmete.budget_app.alert.entity.AlertStatus;
 import com.ahmete.budget_app.alert.repository.AlertRepository;
-import com.ahmete.budget_app.user.entity.User;
-import com.ahmete.budget_app.user.repository.UserRepository;
+import com.ahmete.budget_app.common.dto.response.PageResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.NoSuchElementException;
 
 @Service
 public class AlertService {
 	
 	private final AlertRepository alertRepository;
-	private final UserRepository userRepository;
 	
-	public AlertService(AlertRepository alertRepository, UserRepository userRepository) {
+	public AlertService(AlertRepository alertRepository) {
 		this.alertRepository = alertRepository;
-		this.userRepository = userRepository;
 	}
 	
 	@Transactional(readOnly = true)
-	public List<AlertResponse> listByUser(Long userId, AlertStatus status) {
-		User user = userRepository.findById(userId)
-		                          .orElseThrow(() -> new NoSuchElementException("User not found: " + userId));
+	public PageResponse<AlertResponse> listByUser(Long userId, AlertStatus status, int page, int size) {
+		PageRequest pr = PageRequest.of(page, size);
 		
-		List<Alert> alerts = (status == null)
-				? alertRepository.findByUserOrderByCreatedAtDesc(user)
-				: alertRepository.findByUserAndStatusOrderByCreatedAtDesc(user, status);
+		// default ACTIVE
+		AlertStatus effectiveStatus = (status == null) ? AlertStatus.ACTIVE : status;
 		
-		return alerts.stream().map(this::toResponse).toList();
+		Page<Alert> result = alertRepository.findByUserIdAndStatusOrderByCreatedAtDesc(userId, effectiveStatus, pr);
+		
+		return new PageResponse<>(
+				result.getContent().stream().map(this::toResponse).toList(),
+				result.getNumber(),
+				result.getSize(),
+				result.getTotalElements(),
+				result.getTotalPages()
+		);
 	}
 	
 	@Transactional
 	public void markRead(Long userId, Long alertId) {
 		Alert alert = alertRepository.findByIdAndUserId(alertId, userId)
-		                             .orElseThrow(() -> new NoSuchElementException("Alert not found: " + alertId + " for userId=" + userId));
+		                             .orElseThrow(() -> new java.util.NoSuchElementException("Alert not found: " + alertId));
 		
 		alert.markRead();
-		alertRepository.save(alert);
-	}
-	
-	@Transactional
-	public void markAllRead(Long userId) {
-		User user = userRepository.findById(userId)
-		                          .orElseThrow(() -> new NoSuchElementException("User not found: " + userId));
-		
-		List<Alert> activeAlerts = alertRepository.findByUserAndStatusOrderByCreatedAtDesc(user, AlertStatus.ACTIVE);
-		for (Alert a : activeAlerts) {
-			a.markRead();
-		}
-		alertRepository.saveAll(activeAlerts);
 	}
 	
 	private AlertResponse toResponse(Alert a) {
