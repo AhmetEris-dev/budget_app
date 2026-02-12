@@ -71,4 +71,56 @@ public class GlobalExceptionHandler {
 		);
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
 	}
+	@ExceptionHandler(BadRequestException.class)
+	public ResponseEntity<ApiError> handleBadRequest(BadRequestException ex, HttpServletRequest req) {
+		ApiError body = new ApiError(
+				LocalDateTime.now(),
+				HttpStatus.BAD_REQUEST.value(),
+				"Bad Request",
+				ex.getMessage(),
+				req.getRequestURI(),
+				null
+		);
+		return ResponseEntity.badRequest().body(body);
+	}
+	
+	@ExceptionHandler(NotFoundException.class)
+	public ResponseEntity<ApiError> handleNotFoundCustom(NotFoundException ex, HttpServletRequest req) {
+		ApiError body = new ApiError(
+				LocalDateTime.now(),
+				HttpStatus.NOT_FOUND.value(),
+				"Not Found",
+				ex.getMessage(),
+				req.getRequestURI(),
+				null
+		);
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+	}
+	
+	@ExceptionHandler(IllegalArgumentException.class)
+	public ResponseEntity<ApiError> handleIllegalArg(IllegalArgumentException ex, HttpServletRequest req) {
+		ApiError body = new ApiError(
+				LocalDateTime.now(),
+				HttpStatus.BAD_REQUEST.value(),
+				"Bad Request",
+				ex.getMessage(),
+				req.getRequestURI(),
+				null
+		);
+		return ResponseEntity.badRequest().body(body);
+	}
+	
+	@ExceptionHandler(UnauthorizedException.class)
+	public ResponseEntity<ApiError> handleUnauthorized(UnauthorizedException ex, HttpServletRequest req) {
+		ApiError body = new ApiError(
+				LocalDateTime.now(),
+				HttpStatus.UNAUTHORIZED.value(),
+				"Unauthorized",
+				ex.getMessage(),
+				req.getRequestURI(),
+				null
+		);
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
+	}
+	
 }

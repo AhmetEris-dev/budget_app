@@ -1,6 +1,7 @@
 package com.ahmete.budget_app.expense.controller;
 
 import com.ahmete.budget_app.constants.RestApis;
+import com.ahmete.budget_app.common.security.SecurityUtils;
 import com.ahmete.budget_app.expense.dto.request.CreateExpenseRequest;
 import com.ahmete.budget_app.expense.dto.response.ExpenseResponse;
 import com.ahmete.budget_app.expense.dto.response.ExpenseSummaryResponse;
@@ -25,28 +26,26 @@ public class ExpenseController {
 	
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public ExpenseResponse create(
-			@RequestParam Long userId,
-			@Valid @RequestBody CreateExpenseRequest request
-	) {
+	public ExpenseResponse create(@Valid @RequestBody CreateExpenseRequest request) {
+		Long userId = SecurityUtils.currentUserId();
 		return expenseService.create(userId, request);
 	}
 	
 	@GetMapping
 	public List<ExpenseResponse> listByPeriod(
-			@RequestParam Long userId,
 			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
 			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end
 	) {
+		Long userId = SecurityUtils.currentUserId();
 		return expenseService.listByPeriod(userId, start, end);
 	}
 	
 	@GetMapping(RestApis.Expense.TOTAL)
 	public ExpenseSummaryResponse summary(
-			@RequestParam Long userId,
 			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
 			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end
 	) {
+		Long userId = SecurityUtils.currentUserId();
 		return expenseService.sumByPeriod(userId, start, end);
 	}
 }
