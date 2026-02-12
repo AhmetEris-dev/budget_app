@@ -6,9 +6,11 @@ import com.ahmete.budget_app.common.dto.response.PageResponse;
 import com.ahmete.budget_app.alert.dto.response.AlertResponse;
 import com.ahmete.budget_app.common.security.SecurityUtils;
 import com.ahmete.budget_app.constants.RestApis;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping(RestApis.Alert.ROOT)
 public class AlertController {

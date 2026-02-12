@@ -6,6 +6,7 @@ import com.ahmete.budget_app.expense.dto.request.CreateExpenseRequest;
 import com.ahmete.budget_app.expense.dto.response.ExpenseResponse;
 import com.ahmete.budget_app.expense.dto.response.ExpenseSummaryResponse;
 import com.ahmete.budget_app.expense.service.ExpenseService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 
+
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping(RestApis.Expense.ROOT)
 public class ExpenseController {

@@ -1,28 +1,27 @@
 package com.ahmete.budget_app.common.config;
 
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.Components;
-import io.swagger.v3.oas.models.security.SecurityRequirement;
-import io.swagger.v3.oas.models.security.SecurityScheme;
-import org.springframework.context.annotation.Bean;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@OpenAPIDefinition(
+		info = @Info(title = "BudgetApp API", version = "v1")
+)
+@SecurityScheme(
+		name = "bearerAuth",
+		type = SecuritySchemeType.HTTP,
+		scheme = "bearer",
+		bearerFormat = "JWT"
+)
+@SecurityScheme(
+		name = "apiKeyAuth",
+		type = SecuritySchemeType.APIKEY,
+		in = SecuritySchemeIn.HEADER,
+		paramName = "X-API-KEY"
+)
 public class OpenApiConfig {
-	
-	public static final String API_KEY_SCHEME = "ApiKeyAuth";
-	public static final String HEADER_NAME = "X-API-KEY";
-	
-	@Bean
-	public OpenAPI openAPI() {
-		return new OpenAPI()
-				.addSecurityItem(new SecurityRequirement().addList(API_KEY_SCHEME))
-				.components(new Components().addSecuritySchemes(
-						API_KEY_SCHEME,
-						new SecurityScheme()
-								.name(HEADER_NAME)
-								.type(SecurityScheme.Type.APIKEY)
-								.in(SecurityScheme.In.HEADER)
-				));
-	}
 }

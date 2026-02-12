@@ -6,10 +6,12 @@ import com.ahmete.budget_app.budget.entity.BudgetPeriodType;
 import com.ahmete.budget_app.budget.service.BudgetService;
 import com.ahmete.budget_app.common.security.SecurityUtils;
 import com.ahmete.budget_app.constants.RestApis;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping(RestApis.Budget.ROOT)
 public class BudgetController {
