@@ -6,9 +6,8 @@ import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 
 public record UpsertBudgetRequest(
-		@NotNull Long userId,
 		@NotNull BudgetPeriodType periodType,
 		@Min(2000) int year,
-		Integer month, // MONTHLY => 1..12, YEARLY => null/absent
+		Integer month,
 		@NotNull @Positive BigDecimal limitAmount
 ) {}

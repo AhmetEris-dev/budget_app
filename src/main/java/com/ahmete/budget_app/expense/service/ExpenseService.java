@@ -34,9 +34,10 @@ public class ExpenseService {
     }
     
     @Transactional
-    public ExpenseResponse create(CreateExpenseRequest request) {
-        User user = userRepository.findById(request.userId())
-                                  .orElseThrow(() -> new NoSuchElementException("User not found: " + request.userId()));
+    public ExpenseResponse create(Long userId, CreateExpenseRequest request) {
+        
+        User user = userRepository.findById(userId)
+                                  .orElseThrow(() -> new NoSuchElementException("User not found: " + userId));
         
         Expense expense = new Expense(
                 user,
@@ -47,13 +48,14 @@ public class ExpenseService {
                 request.type()
         );
         
-        Expense saved = expenseRepository.save(expense);
+        expense = expenseRepository.save(expense);
         
-        // ✅ Tek doğru yer: budget/alert kontrolü
-        budgetMonitorService.evaluateAndAlert(user.getId(), saved.getExpenseDate());
+        // Alert evaluation logic (varsa)
+        budgetMonitorService.evaluateAndAlert(userId, request.expenseDate());
         
-        return toResponse(saved);
+        return toResponse(expense);
     }
+    
     
     @Transactional(readOnly = true)
     public List<ExpenseResponse> listByPeriod(Long userId, LocalDate start, LocalDate end) {

@@ -27,29 +27,28 @@ public class BudgetService {
     }
     
     @Transactional
-    public BudgetResponse upsert(UpsertBudgetRequest req) {
-        User user = userRepository.findById(req.userId())
-                                  .orElseThrow(() -> new NoSuchElementException("User not found: " + req.userId()));
+    public BudgetResponse upsert(Long userId, UpsertBudgetRequest req) {
         
-        // 1) active budget bul
+        User user = userRepository.findById(userId)
+                                  .orElseThrow(() -> new NoSuchElementException("User not found: " + userId));
+        
         Optional<Budget> activeOpt = (req.periodType() == BudgetPeriodType.MONTHLY)
                 ? budgetRepository.findByUserAndPeriodTypeAndYearAndMonthAndDeletedFalse(
                 user, req.periodType(), req.year(), req.month())
                 : budgetRepository.findByUserAndPeriodTypeAndYearAndMonthIsNullAndDeletedFalse(
                 user, req.periodType(), req.year());
         
-        // 2) varsa soft delete
         activeOpt.ifPresent(active -> {
             active.softDelete();
-            budgetRepository.saveAndFlush(active); // <-- flush şart (aynı transaction içinde unique çakışmasın)
+            budgetRepository.saveAndFlush(active);
         });
         
-        // 3) yeni budget insert
         Budget created = new Budget(user, req.periodType(), req.year(), req.month(), req.limitAmount());
         created = budgetRepository.save(created);
         
         return BudgetMapper.toResponse(created);
     }
+    
     
     @Transactional(readOnly = true)
     public BudgetResponse getActive(

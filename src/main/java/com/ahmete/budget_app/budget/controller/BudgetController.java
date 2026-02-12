@@ -9,8 +9,6 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping(RestApis.Budget.ROOT)
 public class BudgetController {
@@ -23,9 +21,13 @@ public class BudgetController {
 	
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public BudgetResponse upsert(@Valid @RequestBody UpsertBudgetRequest request) {
-		return budgetService.upsert(request);
+	public BudgetResponse upsert(
+			@RequestParam Long userId,
+			@Valid @RequestBody UpsertBudgetRequest request
+	) {
+		return budgetService.upsert(userId, request);
 	}
+
 	
 	@GetMapping(RestApis.Budget.ACTIVE)
 	public BudgetResponse getActive(
@@ -35,24 +37,5 @@ public class BudgetController {
 			@RequestParam(required = false) Integer month
 	) {
 		return budgetService.getActive(userId, periodType, year, month);
-	}
-	
-	// ✅ GET /api/v1/budgets/{id}
-	@GetMapping(RestApis.User.BY_ID) // "/{id}" zaten var; tekrar kullanıyoruz
-	public BudgetResponse getById(@PathVariable Long id) {
-		return budgetService.getById(id);
-	}
-	
-	// ✅ GET /api/v1/budgets?userId=1
-	@GetMapping
-	public List<BudgetResponse> listByUser(@RequestParam Long userId) {
-		return budgetService.listByUser(userId);
-	}
-	
-	// ✅ DELETE /api/v1/budgets/{id}
-	@DeleteMapping(RestApis.User.BY_ID)
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void delete(@PathVariable Long id) {
-		budgetService.delete(id);
 	}
 }

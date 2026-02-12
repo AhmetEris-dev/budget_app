@@ -7,8 +7,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public record CreateExpenseRequest(
-		@NotNull Long userId,
-		
 		@NotNull
 		@DecimalMin(value = "0.01", message = "amount must be > 0")
 		@Digits(integer = 17, fraction = 2)
