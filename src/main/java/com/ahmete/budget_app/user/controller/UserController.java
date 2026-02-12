@@ -2,6 +2,7 @@ package com.ahmete.budget_app.user.controller;
 
 import com.ahmete.budget_app.constants.RestApis;
 import com.ahmete.budget_app.user.dto.request.CreateUserRequest;
+import com.ahmete.budget_app.user.dto.response.CreateUserResponse;
 import com.ahmete.budget_app.user.dto.response.UserResponse;
 import com.ahmete.budget_app.user.service.UserService;
 import jakarta.validation.Valid;
@@ -17,7 +18,7 @@ public class UserController {
 	
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public UserResponse create(@Valid @RequestBody CreateUserRequest request) {
+	public CreateUserResponse create(@Valid @RequestBody CreateUserRequest request) {
 		return userService.create(request);
 	}
 	

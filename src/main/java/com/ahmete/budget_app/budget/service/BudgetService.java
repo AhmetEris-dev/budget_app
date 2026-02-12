@@ -6,13 +6,11 @@ import com.ahmete.budget_app.budget.entity.Budget;
 import com.ahmete.budget_app.budget.entity.BudgetPeriodType;
 import com.ahmete.budget_app.budget.mapper.BudgetMapper;
 import com.ahmete.budget_app.budget.repository.BudgetRepository;
-import com.ahmete.budget_app.user.entity.User;
 import com.ahmete.budget_app.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @Service
 public class BudgetService {
@@ -20,86 +18,66 @@ public class BudgetService {
     private final BudgetRepository budgetRepository;
     private final UserRepository userRepository;
     
-    public BudgetService(BudgetRepository budgetRepository,
-                         UserRepository userRepository) {
+    public BudgetService(BudgetRepository budgetRepository, UserRepository userRepository) {
         this.budgetRepository = budgetRepository;
         this.userRepository = userRepository;
     }
     
+    // ... aynı package/importlar
+    
     @Transactional
     public BudgetResponse upsert(Long userId, UpsertBudgetRequest req) {
+        var user = userRepository.findById(userId)
+                                 .orElseThrow(() -> new NoSuchElementException("User not found: " + userId));
         
-        User user = userRepository.findById(userId)
-                                  .orElseThrow(() -> new NoSuchElementException("User not found: " + userId));
+        Integer normalizedMonth = normalizeAndValidateMonth(req.periodType(), req.month());
         
-        Optional<Budget> activeOpt = (req.periodType() == BudgetPeriodType.MONTHLY)
-                ? budgetRepository.findByUserAndPeriodTypeAndYearAndMonthAndDeletedFalse(
-                user, req.periodType(), req.year(), req.month())
-                : budgetRepository.findByUserAndPeriodTypeAndYearAndMonthIsNullAndDeletedFalse(
-                user, req.periodType(), req.year());
+        Budget budget = budgetRepository
+                .findByUser_IdAndPeriodTypeAndYearAndMonthAndDeletedFalse(userId, req.periodType(), req.year(), normalizedMonth)
+                .map(existing -> {
+                    existing.changeLimit(req.limitAmount());
+                    existing.activate();
+                    return existing;
+                })
+                .orElseGet(() -> new Budget(user, req.periodType(), req.year(), normalizedMonth, req.limitAmount()));
         
-        activeOpt.ifPresent(active -> {
-            active.softDelete();
-            budgetRepository.saveAndFlush(active);
-        });
-        
-        Budget created = new Budget(user, req.periodType(), req.year(), req.month(), req.limitAmount());
-        created = budgetRepository.save(created);
-        
-        return BudgetMapper.toResponse(created);
+        Budget saved = budgetRepository.save(budget);
+        return BudgetMapper.toResponse(saved);
     }
     
     
     @Transactional(readOnly = true)
-    public BudgetResponse getActive(
-            Long userId,
-            BudgetPeriodType periodType,
-            int year,
-            Integer month
-    ) {
+    public BudgetResponse getActive(Long userId, BudgetPeriodType periodType, int year, Integer month) {
+        userRepository.findById(userId)
+                      .orElseThrow(() -> new NoSuchElementException("User not found: " + userId));
         
-        User user = userRepository.findById(userId)
-                                  .orElseThrow(() -> new NoSuchElementException(
-                                          "User not found: " + userId
-                                  ));
+        Integer normalizedMonth = normalizeAndValidateMonth(periodType, month);
         
-        Budget budget;
+        Budget budget = budgetRepository
+                .findByUser_IdAndPeriodTypeAndYearAndMonthAndActiveTrueAndDeletedFalse(userId, periodType, year, normalizedMonth)
+                .orElseThrow(() -> new NoSuchElementException("Active budget not found"));
         
+        return BudgetMapper.toResponse(budget);
+    }
+    
+    private Integer normalizeAndValidateMonth(BudgetPeriodType periodType, Integer month) {
         if (periodType == BudgetPeriodType.MONTHLY) {
-            
             if (month == null) {
                 throw new IllegalArgumentException("MONTHLY budget requires month");
             }
-            
-            budget = budgetRepository
-                    .findByUserAndPeriodTypeAndYearAndMonthAndDeletedFalse(
-                            user, periodType, year, month
-                    )
-                    .orElseThrow(() ->
-                                         new NoSuchElementException("Active monthly budget not found")
-                    );
-            
-        } else {
-            
-            budget = budgetRepository
-                    .findByUserAndPeriodTypeAndYearAndMonthIsNullAndDeletedFalse(
-                            user, periodType, year
-                    )
-                    .orElseThrow(() ->
-                                         new NoSuchElementException("Active yearly budget not found")
-                    );
+            if (month < 1 || month > 12) {
+                throw new IllegalArgumentException("month must be between 1 and 12");
+            }
+            return month;
         }
         
-        return new BudgetResponse(
-                budget.getId(),
-                budget.getUser().getId(),
-                budget.getPeriodType(),
-                budget.getYear(),
-                budget.getMonth(),
-                budget.getLimitAmount(),
-                budget.getCreatedAt()
-        );
+        // MONTHLY değilse month göndermek yasak (istemci saçmalamasın)
+        if (month != null) {
+            throw new IllegalArgumentException("month must be null when periodType is not MONTHLY");
+        }
+        return null;
     }
+    
     @Transactional(readOnly = true)
     public BudgetResponse getById(Long id) {
         Budget budget = budgetRepository.findByIdAndDeletedFalse(id)
@@ -109,10 +87,10 @@ public class BudgetService {
     
     @Transactional(readOnly = true)
     public java.util.List<BudgetResponse> listByUser(Long userId) {
-        User user = userRepository.findById(userId)
-                                  .orElseThrow(() -> new NoSuchElementException("User not found: " + userId));
+        userRepository.findById(userId)
+                      .orElseThrow(() -> new NoSuchElementException("User not found: " + userId));
         
-        return budgetRepository.findByUserAndDeletedFalseOrderByCreatedAtDesc(user)
+        return budgetRepository.findByUser_IdAndDeletedFalseOrderByCreatedAtDesc(userId)
                                .stream()
                                .map(BudgetMapper::toResponse)
                                .toList();
@@ -126,5 +104,4 @@ public class BudgetService {
         budget.softDelete();
         budgetRepository.save(budget);
     }
-    
 }

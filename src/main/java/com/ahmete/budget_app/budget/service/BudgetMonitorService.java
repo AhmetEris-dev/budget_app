@@ -52,13 +52,13 @@ public class BudgetMonitorService {
 		int month = expenseDate.getMonthValue();
 		
 		Optional<Budget> budgetOpt =
-				budgetRepository.findByUserAndPeriodTypeAndYearAndMonthAndDeletedFalse(
-						user, BudgetPeriodType.MONTHLY, year, month
+				budgetRepository.findByUser_IdAndPeriodTypeAndYearAndMonthAndDeletedFalse(
+						userId, BudgetPeriodType.MONTHLY, year, month
 				);
 		
 		if (budgetOpt.isEmpty()) {
-			budgetOpt = budgetRepository.findByUserAndPeriodTypeAndYearAndMonthIsNullAndDeletedFalse(
-					user, BudgetPeriodType.YEARLY, year
+			budgetOpt = budgetRepository.findByUser_IdAndPeriodTypeAndYearAndMonthIsNullAndDeletedFalse(
+					userId, BudgetPeriodType.YEARLY, year
 			);
 		}
 		
@@ -71,7 +71,7 @@ public class BudgetMonitorService {
 		String periodStr;
 		
 		if (budget.getPeriodType() == BudgetPeriodType.MONTHLY) {
-			int m = budget.getMonth(); // monthly ise null değil
+			int m = budget.getMonth();
 			start = LocalDate.of(budget.getYear(), m, 1);
 			end = YearMonth.of(budget.getYear(), m).atEndOfMonth();
 			periodStr = budget.getYear() + "-" + String.format("%02d", m);
@@ -82,6 +82,7 @@ public class BudgetMonitorService {
 		}
 		
 		BigDecimal totalSpent = expenseRepository.sumAmountByUserIdAndExpenseDateBetween(userId, start, end);
+		if (totalSpent == null) totalSpent = BigDecimal.ZERO;
 		
 		BigDecimal limit = budget.getLimitAmount();
 		if (limit == null || limit.compareTo(BigDecimal.ZERO) <= 0) return;

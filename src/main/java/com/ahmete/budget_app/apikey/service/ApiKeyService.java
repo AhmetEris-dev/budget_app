@@ -25,9 +25,9 @@ public class ApiKeyService {
 	private final ApiKeyHasher hasher;
 	
 	@Transactional
-	public CreateApiKeyResponse create(CreateApiKeyRequest req) {
-		User user = userRepository.findById(req.userId())
-		                          .orElseThrow(() -> new NoSuchElementException("User not found: " + req.userId()));
+	public CreateApiKeyResponse create(Long userId, CreateApiKeyRequest req) {
+		User user = userRepository.findById(userId)
+		                          .orElseThrow(() -> new NoSuchElementException("User not found: " + userId));
 		
 		String rawKey = generateRawKey();
 		String hash = hasher.sha256Hex(rawKey);
@@ -50,9 +50,27 @@ public class ApiKeyService {
 		);
 	}
 	
+	
 	private String generateRawKey() {
 		byte[] bytes = new byte[32];
 		new SecureRandom().nextBytes(bytes);
 		return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
 	}
+	@Transactional
+	public String createInitialKeyForUser(User user, String clientName) {
+		String rawKey = generateRawKey();
+		String hash = hasher.sha256Hex(rawKey);
+		
+		ApiKey apiKey = new ApiKey();
+		apiKey.setUser(user);
+		apiKey.setClientName(clientName);
+		apiKey.setKeyHash(hash);
+		apiKey.setActive(true);
+		apiKey.setCreatedAt(LocalDateTime.now());
+		
+		apiKeyRepository.save(apiKey);
+		return rawKey; // sadece buradan dönsün
+	}
+	
+	// generateRawKey() zaten sende var, olduğu gibi kalsın
 }
