@@ -1,12 +1,9 @@
 package com.ahmete.budget_app.user.controller;
 
+import com.ahmete.budget_app.common.security.SecurityUtils;
 import com.ahmete.budget_app.constants.RestApis;
-import com.ahmete.budget_app.user.dto.request.CreateUserRequest;
-import com.ahmete.budget_app.user.dto.response.CreateUserResponse;
 import com.ahmete.budget_app.user.dto.response.UserResponse;
 import com.ahmete.budget_app.user.service.UserService;
-import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -16,14 +13,17 @@ public class UserController {
 	private final UserService userService;
 	public UserController(UserService userService) { this.userService = userService; }
 	
-	@PostMapping
-	@ResponseStatus(HttpStatus.CREATED)
-	public CreateUserResponse create(@Valid @RequestBody CreateUserRequest request) {
-		return userService.create(request);
+	// JWT ile kendi bilgim
+	@GetMapping("/me")
+	public UserResponse me() {
+		Long userId = SecurityUtils.currentUserId();
+		return userService.getById(userId);
 	}
 	
-	@GetMapping(RestApis.User.BY_ID)
-	public UserResponse getById(@PathVariable Long id) {
-		return userService.getById(id);
-	}
+	// İstersen bunu tamamen kaldır.
+	// Eğer admin gibi rol sistemi kuracaksan ileride geri eklersin.
+	// @GetMapping(RestApis.User.BY_ID)
+	// public UserResponse getById(@PathVariable Long id) {
+	//     return userService.getById(id);
+	// }
 }

@@ -27,19 +27,16 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
 			throws ServletException, IOException {
 		
-		// CORS preflight
 		if ("OPTIONS".equalsIgnoreCase(req.getMethod())) {
 			chain.doFilter(req, res);
 			return;
 		}
 		
-		// zaten auth olmuşsa elleme
 		if (SecurityContextHolder.getContext().getAuthentication() != null) {
 			chain.doFilter(req, res);
 			return;
 		}
 		
-		// header yoksa geç -> protected endpointlerde Security 401 basar
 		String raw = req.getHeader(HEADER);
 		if (raw == null || raw.isBlank()) {
 			chain.doFilter(req, res);
@@ -47,10 +44,8 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
 		}
 		
 		String hash = hasher.sha256Hex(raw);
-		
 		ApiKey apiKey = apiKeyRepository.findByKeyHashAndActiveTrue(hash).orElse(null);
 		if (apiKey == null) {
-			// invalid key -> auth yokmuş gibi davran (401’i Security basar)
 			chain.doFilter(req, res);
 			return;
 		}

@@ -21,6 +21,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 	}
 	
 	@Override
+	protected boolean shouldNotFilter(HttpServletRequest request) {
+		String path = request.getRequestURI();
+		return path.startsWith("/api/v1/auth/")
+				|| path.startsWith("/swagger-ui")
+				|| path.startsWith("/v3/api-docs")
+				|| path.equals("/swagger-ui.html");
+	}
+	
+	@Override
 	protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
 			throws ServletException, IOException {
 		
@@ -29,6 +38,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 			return;
 		}
 		
+		// Zaten auth set edilmişse dokunma
 		if (SecurityContextHolder.getContext().getAuthentication() != null) {
 			chain.doFilter(req, res);
 			return;
@@ -48,7 +58,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 		
 		Long userId = jwtService.parseUserId(token);
 		
-		// Aynı principal yapısını kullanıyoruz: userId yeterli
+		// Var olan principal/token modelini reuse ediyorsun, sorun değil.
 		ApiKeyPrincipal principal = new ApiKeyPrincipal(userId, null, "jwt");
 		SecurityContextHolder.getContext().setAuthentication(new ApiKeyAuthenticationToken(principal));
 		
