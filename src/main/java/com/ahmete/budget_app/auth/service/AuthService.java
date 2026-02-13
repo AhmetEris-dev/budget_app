@@ -60,7 +60,7 @@ public class AuthService {
 		String refreshRaw = generateRefreshRaw();
 		saveRefresh(saved, refreshRaw);
 		
-		return new TokenResponse(saved.getId(), access, refreshRaw);
+		return new TokenResponse(access, refreshRaw);
 	}
 	
 	@Transactional
@@ -76,7 +76,7 @@ public class AuthService {
 		String refreshRaw = generateRefreshRaw();
 		saveRefresh(user, refreshRaw);
 		
-		return new TokenResponse(user.getId(), access, refreshRaw);
+		return new TokenResponse( access, refreshRaw);
 	}
 	
 	@Transactional
@@ -98,7 +98,7 @@ public class AuthService {
 		String newRefreshRaw = generateRefreshRaw();
 		saveRefresh(rt.getUser(), newRefreshRaw);
 		
-		return new TokenResponse(rt.getUser().getId(), newAccess, newRefreshRaw);
+		return new TokenResponse( newAccess, newRefreshRaw);
 	}
 	
 	private void saveRefresh(User user, String refreshRaw) {

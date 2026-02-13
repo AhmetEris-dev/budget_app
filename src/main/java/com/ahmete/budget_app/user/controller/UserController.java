@@ -19,7 +19,7 @@ public class UserController {
 	// JWT ile kendi bilgim
 	@GetMapping("/me")
 	public UserResponse me() {
-		Long userId = SecurityUtils.currentUserId();
+		Long userId = SecurityUtils.requireUserId();
 		return userService.getById(userId);
 	}
 	

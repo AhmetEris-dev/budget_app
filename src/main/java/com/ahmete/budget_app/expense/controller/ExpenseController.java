@@ -30,7 +30,8 @@ public class ExpenseController {
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	public ExpenseResponse create(@Valid @RequestBody CreateExpenseRequest request) {
-		Long userId = SecurityUtils.currentUserId();
+		Long userId = SecurityUtils.requireUserId();
+		
 		return expenseService.create(userId, request);
 	}
 	
@@ -39,7 +40,7 @@ public class ExpenseController {
 			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
 			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end
 	) {
-		Long userId = SecurityUtils.currentUserId();
+		Long userId = SecurityUtils.requireUserId();
 		return expenseService.listByPeriod(userId, start, end);
 	}
 	
@@ -48,7 +49,7 @@ public class ExpenseController {
 			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
 			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end
 	) {
-		Long userId = SecurityUtils.currentUserId();
+		Long userId = SecurityUtils.requireUserId();
 		return expenseService.sumByPeriod(userId, start, end);
 	}
 }

@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 
 public record AlertResponse(
 		Long id,
-		Long userId,
 		Long budgetId,
 		BudgetPeriodType periodType,
 		int year,
@@ -18,8 +17,6 @@ public record AlertResponse(
 		BigDecimal totalExpense,
 		AlertType type,
 		String message,
-		
-		// ✅ NEW
 		AlertStatus status,
 		LocalDateTime readAt
 ) {}

@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 
 public record BudgetResponse(
 		Long id,
-		Long userId,
 		BudgetPeriodType periodType,
 		int year,
 		Integer month,

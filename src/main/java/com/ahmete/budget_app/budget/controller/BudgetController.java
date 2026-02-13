@@ -25,7 +25,8 @@ public class BudgetController {
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	public BudgetResponse upsert(@Valid @RequestBody UpsertBudgetRequest request) {
-		Long userId = SecurityUtils.currentUserId();
+		Long userId = SecurityUtils.requireUserId();
+		
 		return budgetService.upsert(userId, request);
 	}
 	
@@ -35,7 +36,7 @@ public class BudgetController {
 			@RequestParam int year,
 			@RequestParam(required = false) Integer month
 	) {
-		Long userId = SecurityUtils.currentUserId();
+		Long userId = SecurityUtils.requireUserId();
 		return budgetService.getActive(userId, periodType, year, month);
 	}
 }

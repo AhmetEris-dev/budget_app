@@ -27,13 +27,13 @@ public class AlertController {
 			@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size
 	) {
-		Long userId = SecurityUtils.currentUserId();
+		Long userId = SecurityUtils.requireUserId();
 		return alertService.listByUser(userId, status, page, size);
 	}
 	
 	@PatchMapping("/{id}/read")
 	public ResponseEntity<Void> markRead(@PathVariable Long id) {
-		Long userId = SecurityUtils.currentUserId();
+		Long userId = SecurityUtils.requireUserId();
 		alertService.markRead(userId, id);
 		return ResponseEntity.noContent().build();
 	}

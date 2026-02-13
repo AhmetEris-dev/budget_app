@@ -48,7 +48,6 @@ public class AlertService {
 	private AlertResponse toResponse(Alert a) {
 		return new AlertResponse(
 				a.getId(),
-				a.getUser().getId(),
 				a.getBudget().getId(),
 				a.getPeriodType(),
 				a.getYear(),
@@ -60,5 +59,6 @@ public class AlertService {
 				a.getStatus(),
 				a.getReadAt()
 		);
+		
 	}
 }

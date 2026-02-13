@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 
 public record ExpenseResponse(
 		Long id,
-		Long userId,
 		BigDecimal amount,
 		LocalDate expenseDate,
 		String title,

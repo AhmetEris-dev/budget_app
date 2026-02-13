@@ -19,7 +19,7 @@ public class ApiKeyController {
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	public CreateApiKeyResponse create(@Valid @RequestBody CreateApiKeyRequest request) {
-		Long userId = SecurityUtils.currentUserId();
+		Long userId = SecurityUtils.requireUserId();
 		return apiKeyService.create(userId, request);
 	}
 }

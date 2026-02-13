@@ -28,7 +28,7 @@ spring:
       issuer: budget-app
       secret: "DEV_ONLY_CHANGE_ME_please_use_env_var_12345678901234567890"
       access-token-minutes: 15
-      refresh-token-days: 14
+      refresh-token-days: 1
 
   # ✅ “generated security password” ve inMemoryUserDetailsManager'ı kapat
   autoconfigure:

@@ -75,17 +75,16 @@ public class ExpenseService {
         if (total == null) total = BigDecimal.ZERO;
         
         return new ExpenseSummaryResponse(
-                userId,
                 start.toString(),
                 end.toString(),
                 total
         );
+        
     }
     
     private ExpenseResponse toResponse(Expense e) {
         return new ExpenseResponse(
                 e.getId(),
-                e.getUser().getId(),
                 e.getAmount(),
                 e.getExpenseDate(),
                 e.getTitle(),
@@ -93,5 +92,6 @@ public class ExpenseService {
                 e.getType(),
                 e.getCreatedAt()
         );
+        
     }
 }

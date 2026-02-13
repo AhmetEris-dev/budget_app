@@ -43,11 +43,12 @@ public class ApiKeyService {
 		
 		return new CreateApiKeyResponse(
 				saved.getId(),
-				user.getId(),
 				saved.getClientName(),
 				rawKey,
 				saved.getCreatedAt()
 		);
+		
+		
 	}
 	
 	
